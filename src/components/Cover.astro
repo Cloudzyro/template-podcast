@@ -1,0 +1,279 @@
+---
+// Episode cover art, drawn in code: a night scene from where the episode was
+// recorded. To use your own artwork instead, swap this for an <img>.
+interface Props {
+  scene: "harbor" | "bakery" | "ward" | "bridge" | "radio" | "signal" | "laundry" | "bus";
+  label: string;
+  class?: string;
+  number?: number;
+}
+const { scene, label, class: className, number } = Astro.props;
+
+const lamp = "#f2a93b";
+const glow = "#ffd28a";
+const skies: Record<Props["scene"], [string, string]> = {
+  harbor: ["#0e1830", "#1c2b47"],
+  bakery: ["#171425", "#2a2238"],
+  ward: ["#0d1b24", "#18303a"],
+  bridge: ["#0f1426", "#1f2944"],
+  radio: ["#140f22", "#2a1f3b"],
+  signal: ["#0f1a1c", "#1d3133"],
+  laundry: ["#111628", "#232b46"],
+  bus: ["#151321", "#2b2536"],
+};
+const [top, bottom] = skies[scene];
+const id = `sky-${scene}-${number ?? 0}`;
+
+// Stars at fixed spots so every build is the same.
+const stars = [
+  [42, 38], [96, 64], [150, 28], [212, 52], [268, 22], [318, 58], [364, 34], [74, 102], [338, 96], [186, 88],
+];
+---
+
+<svg class={className} viewBox="0 0 400 400" role={label ? "img" : undefined} aria-label={label || undefined} aria-hidden={label ? undefined : "true"} preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color={top}></stop>
+      <stop offset="1" stop-color={bottom}></stop>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill={`url(#${id})`}></rect>
+  <g fill="#eef0f5">
+    {stars.map(([x, y], i) => <circle cx={x} cy={y} r={i % 3 === 0 ? 1.4 : 0.9} opacity={i % 2 ? 0.5 : 0.8} />)}
+  </g>
+
+  {
+    scene === "harbor" && (
+      <g>
+        <circle cx="318" cy="92" r="22" fill="#e9e4d6" />
+        <circle cx="328" cy="86" r="20" fill={top} />
+        <path d="M0 232 L70 214 L120 222 L170 206 L230 220 L290 208 L340 218 L400 210 V260 H0Z" fill="#0a0f1d" />
+        <g fill={lamp} opacity="0.7">
+          <rect x="40" y="224" width="3" height="3" />
+          <rect x="150" y="214" width="3" height="3" />
+          <rect x="262" y="214" width="3" height="3" />
+          <rect x="356" y="216" width="3" height="3" />
+        </g>
+        <rect y="258" width="400" height="142" fill="#08101c" />
+        <path d="M86 236 H300 L284 270 H104Z" fill="#101a2c" />
+        <path d="M128 214 H252 V238 H128Z" fill="#16223a" />
+        <rect x="170" y="196" width="40" height="18" fill="#16223a" />
+        <rect x="186" y="176" width="6" height="22" fill="#16223a" />
+        <g fill={glow}>
+          {[140, 160, 180, 200, 220, 240].map((x) => <rect x={x} y="222" width="8" height="8" rx="1.5" />)}
+          <rect x="176" y="201" width="28" height="7" rx="1.5" fill={lamp} />
+        </g>
+        <g stroke={lamp} stroke-width="2" stroke-linecap="round" opacity="0.55">
+          <path d="M140 284h18M176 292h28M216 282h16M150 304h12M196 312h22M240 300h10" />
+        </g>
+        <g fill="#0f1828">
+          <rect x="18" y="246" width="6" height="40" />
+          <rect x="40" y="246" width="6" height="40" />
+          <rect x="10" y="244" width="60" height="5" />
+        </g>
+      </g>
+    )
+  }
+
+  {
+    scene === "bakery" && (
+      <g>
+        <rect x="0" y="300" width="400" height="100" fill="#0c0a14" />
+        <rect x="48" y="96" width="304" height="204" fill="#1d1828" />
+        <path d="M40 140 H360 L344 170 H56Z" fill="#2c2238" />
+        <g fill="#382c46">
+          {[56, 104, 152, 200, 248, 296].map((x) => <path d={`M${x} 170 h48 l-6 12 h-36z`} />)}
+        </g>
+        <rect x="76" y="196" width="180" height="104" rx="3" fill={lamp} />
+        <rect x="76" y="196" width="180" height="104" rx="3" fill={glow} opacity="0.35" />
+        <rect x="76" y="258" width="180" height="4" fill="#a66a18" />
+        <g fill="#8a5313">
+          <ellipse cx="108" cy="250" rx="20" ry="9" />
+          <ellipse cx="152" cy="251" rx="16" ry="8" />
+          <ellipse cx="196" cy="250" rx="22" ry="9" />
+          <ellipse cx="236" cy="251" rx="13" ry="8" />
+          <rect x="96" y="276" width="40" height="14" rx="7" />
+          <rect x="150" y="277" width="30" height="13" rx="6.5" />
+          <rect x="196" y="276" width="44" height="14" rx="7" />
+        </g>
+        <g fill="#5a3a12">
+          <rect x="136" y="196" width="3" height="104" />
+          <rect x="196" y="196" width="3" height="104" />
+        </g>
+        <rect x="120" y="108" width="160" height="24" rx="3" fill="#2c2238" />
+        <rect x="132" y="117" width="96" height="6" rx="3" fill={lamp} opacity="0.55" />
+        <rect x="360" y="150" width="5" height="150" fill="#2c2238" />
+        <rect x="350" y="142" width="26" height="10" rx="3" fill="#2c2238" />
+        <rect x="355" y="152" width="16" height="4" fill={glow} />
+        <rect x="276" y="200" width="56" height="100" fill="#120e1c" />
+        <rect x="282" y="206" width="44" height="40" fill={lamp} opacity="0.75" />
+        <path d="M76 300 L40 360 H292 L256 300Z" fill={lamp} opacity="0.12" />
+        <g fill="#2c2238">
+          <rect x="90" y="40" width="22" height="56" />
+          <path d="M96 40c4-12 14-10 10-22" stroke="#4a3d5a" stroke-width="3" fill="none" />
+        </g>
+      </g>
+    )
+  }
+
+  {
+    scene === "ward" && (
+      <g>
+        <circle cx="74" cy="78" r="18" fill="#e9e4d6" opacity="0.9" />
+        <rect x="70" y="120" width="260" height="280" fill="#13232c" />
+        <rect x="60" y="112" width="280" height="12" fill="#1a2f3a" />
+        <g fill="#1e3440">
+          {[0, 1, 2, 3, 4, 5].map((row) =>
+            [0, 1, 2, 3, 4, 5].map((col) => <rect x={88 + col * 40} y={140 + row * 40} width="24" height="22" rx="2" />),
+          )}
+        </g>
+        <g fill={glow}>
+          {[0, 1, 2, 3, 4, 5].map((col) => <rect x={88 + col * 40} y="220" width="24" height="22" rx="2" opacity={col === 2 ? 1 : 0.8} />)}
+          <rect x="128" y="140" width="24" height="22" rx="2" opacity="0.55" />
+          <rect x="248" y="300" width="24" height="22" rx="2" opacity="0.5" />
+        </g>
+        <rect x="170" y="352" width="60" height="48" fill={lamp} opacity="0.85" />
+        <rect x="0" y="380" width="400" height="20" fill="#0a151b" />
+      </g>
+    )
+  }
+
+  {
+    scene === "bridge" && (
+      <g>
+        <rect y="250" width="400" height="150" fill="#090f1e" />
+        <path d="M0 250 H96 V262 H0Z M304 250 H400 V262 H304Z" fill="#1b2540" />
+        <rect x="84" y="96" width="24" height="166" fill="#1b2540" />
+        <rect x="292" y="96" width="24" height="166" fill="#1b2540" />
+        <rect x="78" y="86" width="36" height="14" fill="#232f50" />
+        <rect x="286" y="86" width="36" height="14" fill="#232f50" />
+        <path d="M108 96 L292 96" stroke="#232f50" stroke-width="6" />
+        <rect x="108" y="150" width="184" height="12" fill="#232f50" />
+        <g stroke="#1b2540" stroke-width="2">
+          <path d="M120 162 L150 150 M160 162 L190 150 M200 162 L230 150 M240 162 L270 150" />
+        </g>
+        <rect x="290" y="56" width="40" height="32" fill="#232f50" />
+        <rect x="296" y="62" width="28" height="14" fill={glow} />
+        <circle cx="96" cy="78" r="3.5" fill={lamp} />
+        <circle cx="304" cy="50" r="3.5" fill={lamp} />
+        <g stroke={lamp} stroke-width="2" stroke-linecap="round" opacity="0.5">
+          <path d="M300 278h20M296 296h28M304 318h12M90 280h14M86 300h22" />
+        </g>
+        <path d="M150 300 h96 l-10 14 h-76z" fill="#141c33" />
+        <rect x="186" y="290" width="20" height="10" fill="#141c33" />
+        <circle cx="160" cy="306" r="2" fill={glow} />
+      </g>
+    )
+  }
+
+  {
+    scene === "radio" && (
+      <g>
+        <path d="M262 340 L292 60 L322 340Z" fill="none" stroke="#3a2d52" stroke-width="4" />
+        <path d="M270 266 L314 266 M276 196 L308 196 M282 128 L302 128 M268 300 L316 230 M272 232 L312 162" stroke="#3a2d52" stroke-width="3" />
+        <circle cx="292" cy="56" r="5" fill="#d9573f" />
+        <rect x="40" y="200" width="200" height="200" fill="#1e1730" />
+        <rect x="40" y="190" width="200" height="12" fill="#2a2140" />
+        <rect x="64" y="232" width="152" height="64" rx="2" fill={lamp} />
+        <rect x="64" y="232" width="152" height="64" rx="2" fill={glow} opacity="0.3" />
+        <g fill="#7a4a10">
+          <rect x="90" y="262" width="40" height="34" rx="3" />
+          <rect x="102" y="248" width="14" height="16" rx="7" />
+          <rect x="148" y="272" width="54" height="10" rx="2" />
+          <rect x="166" y="252" width="4" height="20" />
+        </g>
+        <g fill="#2a2140">
+          <rect x="64" y="320" width="40" height="30" />
+          <rect x="120" y="320" width="40" height="30" />
+          <rect x="176" y="320" width="40" height="30" />
+        </g>
+        <rect x="120" y="320" width="40" height="30" fill={lamp} opacity="0.4" />
+        <rect y="384" width="400" height="16" fill="#120d1d" />
+      </g>
+    )
+  }
+
+  {
+    scene === "signal" && (
+      <g>
+        <rect y="300" width="400" height="100" fill="#0a1415" />
+        <g stroke="#3d5254" stroke-width="3">
+          <path d="M0 336 L400 318 M0 366 L400 344" />
+        </g>
+        <g stroke="#2b3d3f" stroke-width="4">
+          {[20, 70, 120, 170, 220, 270, 320, 370].map((x) => <path d={`M${x} 330 L${x + 6} 372`} />)}
+        </g>
+        <rect x="96" y="200" width="168" height="100" fill="#1a2b2d" />
+        <rect x="88" y="120" width="184" height="84" fill="#203436" />
+        <path d="M80 124 L180 92 L280 124Z" fill="#2a4245" />
+        <rect x="104" y="140" width="152" height="44" fill={glow} />
+        <g fill="#203436">
+          {[140, 176, 212].map((x) => <rect x={x} y="140" width="4" height="44" />)}
+        </g>
+        <g fill="#6b4413">
+          {[112, 120, 128, 228, 236, 244].map((x) => <rect x={x} y="168" width="3" height="16" />)}
+        </g>
+        <rect x="320" y="150" width="6" height="170" fill="#2b3d3f" />
+        <rect x="308" y="136" width="30" height="20" rx="3" fill="#2b3d3f" />
+        <circle cx="323" cy="146" r="5" fill="#4cc38a" opacity="0.9" />
+      </g>
+    )
+  }
+
+  {
+    scene === "laundry" && (
+      <g>
+        <rect x="24" y="110" width="352" height="230" fill="#1c2340" />
+        <rect x="16" y="100" width="368" height="16" fill="#28304f" />
+        <rect x="44" y="140" width="312" height="180" rx="3" fill={lamp} opacity="0.9" />
+        <rect x="44" y="140" width="312" height="180" rx="3" fill={glow} opacity="0.3" />
+        <g>
+          {[64, 140, 216, 292].map((x) => (
+            <g>
+              <rect x={x} y="214" width="64" height="96" rx="4" fill="#e7dccb" />
+              <circle cx={x + 32} cy="264" r="22" fill="#3a3550" />
+              <circle cx={x + 32} cy="264" r="15" fill="#5b6a8e" />
+              <rect x={x + 8} y="222" width="20" height="5" rx="2" fill="#a99c87" />
+            </g>
+          ))}
+        </g>
+        <g fill="#8a5313">
+          <rect x="72" y="166" width="120" height="6" rx="3" />
+          <rect x="230" y="160" width="10" height="34" rx="2" />
+          <circle cx="235" cy="156" r="7" />
+        </g>
+        <rect y="340" width="400" height="60" fill="#0d1120" />
+        <path d="M44 340 L20 400 H380 L356 340Z" fill={lamp} opacity="0.1" />
+      </g>
+    )
+  }
+
+  {
+    scene === "bus" && (
+      <g>
+        <rect y="300" width="400" height="100" fill="#0d0b14" />
+        <path d="M0 330 H400" stroke="#3a3446" stroke-width="2" stroke-dasharray="20 16" />
+        <rect x="300" y="120" width="6" height="182" fill="#3a3446" />
+        <rect x="282" y="96" width="42" height="30" rx="4" fill="#3a3446" />
+        <rect x="290" y="104" width="26" height="14" rx="2" fill={glow} opacity="0.8" />
+        <rect x="28" y="168" width="300" height="122" rx="14" fill="#2c2a3e" />
+        <rect x="28" y="168" width="300" height="20" rx="10" fill="#36334c" />
+        <g fill={glow}>
+          {[48, 104, 160, 216].map((x) => <rect x={x} y="196" width="48" height="44" rx="4" />)}
+        </g>
+        <rect x="272" y="196" width="40" height="84" rx="4" fill={lamp} />
+        <g fill="#6b4413">
+          <circle cx="78" cy="226" r="9" />
+          <rect x="68" y="232" width="20" height="10" rx="4" />
+          <circle cx="184" cy="222" r="9" />
+          <rect x="174" y="228" width="20" height="12" rx="4" />
+        </g>
+        <circle cx="88" cy="292" r="20" fill="#0d0b14" />
+        <circle cx="88" cy="292" r="9" fill="#4a4560" />
+        <circle cx="268" cy="292" r="20" fill="#0d0b14" />
+        <circle cx="268" cy="292" r="9" fill="#4a4560" />
+        <rect x="40" y="250" width="200" height="4" fill="#3d3a54" />
+      </g>
+    )
+  }
+</svg>

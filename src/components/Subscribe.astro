@@ -1,0 +1,83 @@
+---
+import { show } from "../data/show";
+import Icon from "./Icon.astro";
+const links = show.subscribe.filter((s) => s.href);
+const feed = new URL("/rss.xml", Astro.site).toString();
+---
+
+<div class="subscribe">
+  <ul>
+    {
+      links.map((s) => (
+        <li>
+          <a class="btn btn-quiet" href={s.href}>
+            {s.name}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+  <div class="feed">
+    <Icon name="rss" />
+    <code class="mono">{feed}</code>
+    <button type="button" class="btn btn-quiet btn-small" data-copy={feed}>
+      <Icon name="copy" class="i-copy" /><span>Copy</span>
+    </button>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>("[data-copy]").forEach((btn) =>
+    btn.addEventListener("click", async () => {
+      const label = btn.querySelector("span")!;
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copy!);
+        label.textContent = "Copied";
+      } catch {
+        label.textContent = "Select and copy";
+      }
+      setTimeout(() => (label.textContent = "Copy"), 2000);
+    }),
+  );
+</script>
+
+<style>
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .feed {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    padding: 8px 8px 8px 16px;
+    background: var(--deep);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    color: var(--muted);
+    max-width: 36rem;
+  }
+  .feed > :global(svg) {
+    flex: none;
+    width: 16px;
+    height: 16px;
+  }
+  code {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    color: var(--text-2);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .feed :global(.i-copy) {
+    width: 14px;
+    height: 14px;
+  }
+</style>

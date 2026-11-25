@@ -1,0 +1,298 @@
+---
+// An audio player for one episode. The file only downloads when someone presses play.
+import Icon from "./Icon.astro";
+import { toSeconds, waveform } from "../lib/episodes";
+
+interface Props {
+  id: string;
+  title: string;
+  src: string;
+  duration: string;
+  embedUrl?: string;
+}
+const { id, title, src, duration, embedUrl } = Astro.props;
+const bars = waveform(id);
+const isSample = src.includes("night-ferry-sample");
+const embedHost = embedUrl ? new URL(embedUrl).hostname.replace(/^www\./, "") : "";
+---
+
+<div class="player" data-player data-duration={toSeconds(duration)}>
+  <audio preload="none" src={src}></audio>
+  <div class="controls">
+    <button class="play" type="button" data-play aria-label={`Play ${title}`}>
+      <Icon name="play" class="i-play" />
+      <Icon name="pause" class="i-pause" />
+    </button>
+    <div class="track">
+      <svg class="wave" viewBox={`0 0 ${bars.length * 6} 40`} preserveAspectRatio="none" aria-hidden="true">
+        <g class="wave-base">
+          {bars.map((b, i) => <rect x={i * 6} y={20 - b * 18} width="3" height={b * 36} rx="1.5" />)}
+        </g>
+        <g class="wave-played">
+          {bars.map((b, i) => <rect x={i * 6} y={20 - b * 18} width="3" height={b * 36} rx="1.5" />)}
+        </g>
+      </svg>
+      <input
+        class="seek"
+        type="range"
+        min="0"
+        max="1000"
+        step="1"
+        value="0"
+        aria-label="Seek"
+        aria-valuetext="0:00"
+        data-seek
+      />
+    </div>
+  </div>
+  <div class="meta mono">
+    <span><span data-current>0:00</span> / <span data-total>{duration}</span></span>
+    <span class="tools">
+      <button type="button" data-skip="-15" aria-label="Back 15 seconds"><Icon name="back" /><span>15</span></button>
+      <button type="button" data-skip="30" aria-label="Forward 30 seconds"><Icon name="forward" /><span>30</span></button>
+      <button type="button" data-rate aria-label="Playback speed">1x</button>
+    </span>
+  </div>
+  {isSample && <p class="note">Sample audio, 20 seconds. Point each episode at your own file in its Markdown.</p>}
+  {
+    embedUrl && (
+      <div class="embed" data-embed={embedUrl} data-title={title}>
+        <button type="button" class="btn btn-quiet btn-small" data-load-embed>
+          Load the player from {embedHost}
+        </button>
+        <p class="note">Loads a player from {embedHost}, which may set its own cookies.</p>
+      </div>
+    )
+  }
+</div>
+
+<script>
+  const fmt = (s: number) => {
+    if (!Number.isFinite(s)) return "0:00";
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = Math.floor(s % 60).toString().padStart(2, "0");
+    return h ? `${h}:${m.toString().padStart(2, "0")}:${sec}` : `${m}:${sec}`;
+  };
+
+  const rates = [1, 1.25, 1.5, 2];
+
+  document.querySelectorAll<HTMLElement>("[data-player]").forEach((root) => {
+    const audio = root.querySelector("audio")!;
+    const play = root.querySelector<HTMLButtonElement>("[data-play]")!;
+    const seek = root.querySelector<HTMLInputElement>("[data-seek]")!;
+    const current = root.querySelector<HTMLElement>("[data-current]")!;
+    const total = root.querySelector<HTMLElement>("[data-total]")!;
+    const rate = root.querySelector<HTMLButtonElement>("[data-rate]")!;
+    const label = play.getAttribute("aria-label") ?? "Play";
+
+    const duration = () => (Number.isFinite(audio.duration) ? audio.duration : 0);
+    const sync = () => {
+      const d = duration();
+      const p = d ? audio.currentTime / d : 0;
+      root.style.setProperty("--p", String(p));
+      seek.value = String(Math.round(p * 1000));
+      current.textContent = fmt(audio.currentTime);
+      seek.setAttribute("aria-valuetext", `${fmt(audio.currentTime)} of ${fmt(d)}`);
+    };
+
+    play.addEventListener("click", () => (audio.paused ? audio.play() : audio.pause()));
+    audio.addEventListener("play", () => {
+      // One player at a time.
+      document.querySelectorAll("audio").forEach((other) => other !== audio && other.pause());
+      root.classList.add("is-playing");
+      play.setAttribute("aria-label", label.replace("Play", "Pause"));
+    });
+    audio.addEventListener("pause", () => {
+      root.classList.remove("is-playing");
+      play.setAttribute("aria-label", label);
+    });
+    audio.addEventListener("loadedmetadata", () => {
+      total.textContent = fmt(audio.duration);
+      sync();
+    });
+    audio.addEventListener("timeupdate", sync);
+    seek.addEventListener("input", () => {
+      if (!duration()) {
+        audio.load();
+        audio.addEventListener("loadedmetadata", () => (audio.currentTime = (Number(seek.value) / 1000) * duration()), { once: true });
+        return;
+      }
+      audio.currentTime = (Number(seek.value) / 1000) * duration();
+      sync();
+    });
+    root.querySelectorAll<HTMLButtonElement>("[data-skip]").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        audio.currentTime = Math.max(0, Math.min(duration(), audio.currentTime + Number(btn.dataset.skip)));
+        sync();
+      }),
+    );
+    rate.addEventListener("click", () => {
+      const next = rates[(rates.indexOf(audio.playbackRate) + 1) % rates.length];
+      audio.playbackRate = next;
+      rate.textContent = `${next}x`;
+    });
+
+    // Chapter links anywhere on the page: <button data-chapter="125">
+    document.querySelectorAll<HTMLButtonElement>("[data-chapter]").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const go = () => {
+          audio.currentTime = Math.min(Number(btn.dataset.chapter), Math.max(0, duration() - 1));
+          audio.play();
+        };
+        if (duration()) go();
+        else {
+          audio.addEventListener("loadedmetadata", go, { once: true });
+          audio.load();
+        }
+      }),
+    );
+
+    const embed = root.querySelector<HTMLElement>("[data-embed]");
+    embed?.querySelector("[data-load-embed]")?.addEventListener("click", () => {
+      const frame = document.createElement("iframe");
+      frame.src = embed.dataset.embed!;
+      frame.title = `${embed.dataset.title} player`;
+      frame.loading = "lazy";
+      frame.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
+      embed.replaceChildren(frame);
+    });
+  });
+
+  // Buttons elsewhere that start the first player on the page.
+  document.querySelectorAll<HTMLElement>("[data-play-first]").forEach((btn) =>
+    btn.addEventListener("click", (event) => {
+      const audio = document.querySelector<HTMLAudioElement>("[data-player] audio");
+      if (!audio) return;
+      event.preventDefault();
+      audio.closest("[data-player]")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      audio.play();
+    }),
+  );
+</script>
+
+<style>
+  .player {
+    --p: 0;
+    display: grid;
+    gap: 12px;
+  }
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .play {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 0;
+    background: var(--lamp);
+    color: var(--lamp-ink);
+    cursor: pointer;
+    transition:
+      background-color 150ms var(--ease),
+      transform 120ms var(--ease);
+  }
+  .play:hover {
+    background: #f6b955;
+  }
+  .play:active {
+    transform: scale(0.97);
+  }
+  .play :global(svg) {
+    width: 20px;
+    height: 20px;
+  }
+  .play :global(.i-pause),
+  .is-playing .play :global(.i-play) {
+    display: none;
+  }
+  .is-playing .play :global(.i-pause) {
+    display: block;
+  }
+  .track {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    height: 40px;
+  }
+  .wave {
+    width: 100%;
+    height: 100%;
+  }
+  .wave-base {
+    fill: rgb(238 240 245 / 0.18);
+  }
+  .wave-played {
+    fill: var(--lamp);
+    clip-path: inset(0 calc((1 - var(--p)) * 100%) 0 0);
+  }
+  .seek {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .track:has(.seek:focus-visible) {
+    outline: 2px solid var(--lamp);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text-2);
+  }
+  .tools {
+    display: flex;
+    gap: 4px;
+  }
+  .tools button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 32px;
+    min-width: 44px;
+    padding: 0 8px;
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--text-2);
+    font: 400 13px/1 var(--mono);
+    cursor: pointer;
+    transition:
+      color 150ms var(--ease),
+      border-color 150ms var(--ease);
+  }
+  .tools button:hover {
+    color: var(--text);
+    border-color: var(--line-strong);
+  }
+  .tools :global(svg) {
+    width: 14px;
+    height: 14px;
+  }
+  .note {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .embed :global(iframe) {
+    width: 100%;
+    height: 152px;
+    border: 0;
+    border-radius: 12px;
+  }
+  .embed .note {
+    margin-top: 8px;
+  }
+</style>

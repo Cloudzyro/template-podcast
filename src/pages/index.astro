@@ -1,0 +1,268 @@
+---
+import Base from "../layouts/Base.astro";
+import Cover from "../components/Cover.astro";
+import Player from "../components/Player.astro";
+import Shift from "../components/Shift.astro";
+import EpisodeRow from "../components/EpisodeRow.astro";
+import Subscribe from "../components/Subscribe.astro";
+import Form from "../components/Form.astro";
+import Icon from "../components/Icon.astro";
+import { show } from "../data/show";
+import { getEpisodes, episodeUrl, formatDate, minutes } from "../lib/episodes";
+
+const episodes = await getEpisodes();
+const [latest, ...rest] = episodes;
+const recent = rest.slice(0, 5);
+const l = latest.data;
+---
+
+<Base>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="intro">
+        <h1>{show.tagline}</h1>
+        <p class="lede">
+          A weekly interview podcast with the bakers, nurses, bridge operators and bus drivers who keep a city running
+          overnight. Recorded on location, during the shift.
+        </p>
+        <div class="actions">
+          <a class="btn btn-primary" href={episodeUrl(latest)} data-play-first>
+            <Icon name="play" />Play episode {l.number}
+          </a>
+          <a class="btn btn-quiet" href="#subscribe">Subscribe</a>
+        </div>
+      </div>
+
+      <article class="latest" aria-labelledby="latest-title">
+        <a href={episodeUrl(latest)} class="cover-link" tabindex="-1" aria-hidden="true">
+          <Cover scene={l.cover} number={l.number} label="" class="cover" />
+        </a>
+        <div class="latest-body">
+          <div class="latest-meta mono">
+            <span>Episode {l.number}</span>
+            <span>{formatDate(l.date, "short")}</span>
+            <Shift time={l.shift} long />
+          </div>
+          <h2 id="latest-title"><a href={episodeUrl(latest)}>{l.title}</a></h2>
+          <p class="guest">With {l.guest.name}, {l.guest.role.toLowerCase()} at {l.guest.place}</p>
+          <Player id={latest.id} title={l.title} src={l.audio.url} duration={l.duration} embedUrl={l.embedUrl} />
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="recent-title">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="recent-title">Recent episodes</h2>
+        <a href="/episodes/">All {episodes.length} episodes</a>
+      </div>
+      <ul class="list">
+        {recent.map((episode) => <EpisodeRow episode={episode} />)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="hosts-title">
+    <div class="wrap hosts-grid">
+      <div>
+        <h2 id="hosts-title" class="h2">Your hosts</h2>
+        <p class="lede">
+          Two people who used to be awake for a living. They still are, mostly, about once a week.
+        </p>
+        <a class="text-link" href="/about/">About the show</a>
+      </div>
+      <ul class="hosts">
+        {
+          show.hosts.map((host) => (
+            <li>
+              <span class="monogram" aria-hidden="true">{host.initials}</span>
+              <div>
+                <h3>{host.name}</h3>
+                <p class="role">{host.role}</p>
+                <p class="bio">{host.bio}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="subscribe" aria-labelledby="subscribe-title">
+    <div class="wrap listen-grid">
+      <div>
+        <h2 id="subscribe-title" class="h2">Listen wherever you listen</h2>
+        <p class="lede">{show.schedule}, on every podcast app, or straight from the feed.</p>
+        <Subscribe />
+      </div>
+      <div class="letter">
+        <h2 class="h3">{show.newsletter.title}</h2>
+        <p>{show.newsletter.text}</p>
+        <Form kind="newsletter" email={show.email} subject={`Subscribe me to ${show.newsletter.title}`} button={show.newsletter.button} />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    display: grid;
+    align-items: center;
+    min-height: calc(100svh - 64px);
+    padding: clamp(40px, 5vw, 64px) 0;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: clamp(40px, 6vw, 80px);
+    align-items: center;
+  }
+  h1 {
+    font-size: clamp(40px, 5.4vw, 64px);
+    line-height: 1.04;
+    letter-spacing: -0.03em;
+    margin-bottom: 24px;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 32px;
+  }
+  .latest {
+    display: grid;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+  .cover-link {
+    display: block;
+  }
+  .latest :global(.cover) {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+  }
+  .latest-body {
+    display: grid;
+    padding: 20px 24px 24px;
+    align-content: start;
+    gap: 8px;
+    min-width: 0;
+  }
+  .latest-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .latest h2 {
+    font-size: 28px;
+    letter-spacing: -0.01em;
+  }
+  .latest h2 a {
+    text-decoration: none;
+  }
+  .latest h2 a:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--lamp);
+    text-underline-offset: 4px;
+  }
+  .guest {
+    color: var(--text-2);
+    margin-bottom: 12px;
+  }
+  .list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .h2 {
+    font-size: clamp(28px, 3.4vw, 36px);
+    letter-spacing: -0.01em;
+    margin-bottom: 16px;
+  }
+  .h3 {
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+  .text-link {
+    display: inline-block;
+    margin-top: 24px;
+    color: var(--text);
+    text-decoration-color: var(--lamp);
+    text-underline-offset: 4px;
+  }
+  .hosts-grid,
+  .listen-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: clamp(32px, 6vw, 80px);
+  }
+  .hosts {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 32px;
+  }
+  .hosts li {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 20px;
+  }
+  .monogram {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    background: var(--raised);
+    border: 1px solid var(--line);
+    font: 500 18px/1 var(--mono);
+    color: var(--text-2);
+  }
+  .hosts h3 {
+    font-size: 20px;
+  }
+  .role {
+    color: var(--muted);
+    font-size: 14px;
+    margin: 4px 0 8px;
+  }
+  .bio {
+    color: var(--text-2);
+    max-width: 34rem;
+  }
+  .listen-grid {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  }
+  .letter {
+    padding: 24px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    align-self: start;
+  }
+  .letter > p {
+    color: var(--text-2);
+    margin-bottom: 20px;
+  }
+  @media (max-width: 960px) {
+    .hero-grid,
+    .hosts-grid,
+    .listen-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (max-width: 600px) {
+    .latest-body {
+      padding: 16px;
+    }
+    .actions .btn {
+      flex: 1;
+    }
+  }
+</style>

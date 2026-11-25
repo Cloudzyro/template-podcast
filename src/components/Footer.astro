@@ -1,0 +1,94 @@
+---
+import { show } from "../data/show";
+import Logo from "./Logo.astro";
+const year = new Date().getFullYear();
+const links = show.subscribe.filter((s) => s.href);
+---
+
+<footer class="site-footer">
+  <div class="wrap grid">
+    <div class="about">
+      <Logo />
+      <p>{show.tagline}. {show.schedule}.</p>
+    </div>
+    <nav aria-label="Listen">
+      <h2>Listen</h2>
+      <ul>
+        {links.map((s) => <li><a href={s.href}>{s.name}</a></li>)}
+        <li><a href="/rss.xml">RSS feed</a></li>
+      </ul>
+    </nav>
+    <nav aria-label="Show">
+      <h2>Show</h2>
+      <ul>
+        <li><a href="/episodes/">All episodes</a></li>
+        <li><a href="/about/">About and hosts</a></li>
+        <li><a href="/about/#guest">Be a guest</a></li>
+        <li><a href={`mailto:${show.email}`}>{show.email}</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="wrap base">
+    <p>&copy; {year} {show.copyright}</p>
+    <p>{show.footerNote}</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--deep);
+    border-top: 1px solid var(--line);
+    padding: 64px 0 32px;
+    font-size: 15px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 40px;
+  }
+  .about p {
+    margin-top: 16px;
+    color: var(--text-2);
+    max-width: 28rem;
+  }
+  h2 {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 400;
+    margin-bottom: 12px;
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+  }
+  a {
+    color: var(--text-2);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+  ul a:hover {
+    color: var(--text);
+  }
+  .base {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 13px;
+  }
+  @media (max-width: 720px) {
+    .grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .about {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

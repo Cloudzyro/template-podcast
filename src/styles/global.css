@@ -1,0 +1,287 @@
+/* Night Ferry: colors, type and the few shared pieces. Change the colors here. */
+:root {
+  color-scheme: dark;
+  --deep: #07080d;
+  --bg: #0b0d14;
+  --card: #11141c;
+  --raised: #1a1e28;
+  --line: rgb(238 240 245 / 0.08);
+  --line-strong: rgb(238 240 245 / 0.14);
+  --text: #eef0f5;
+  --text-2: #a3a9b8;
+  --muted: #8189a0;
+  /* Sodium streetlight amber: the one accent. Dark text sits on it. */
+  --lamp: #f2a93b;
+  --lamp-ink: #1a1204;
+  --font: "Schibsted Grotesk Variable", system-ui, sans-serif;
+  --mono: "Red Hat Mono Variable", ui-monospace, monospace;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --wrap: 1200px;
+  --gutter: clamp(16px, 4vw, 32px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 80px;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 500;
+  line-height: 1.1;
+  margin: 0;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--lamp);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--lamp);
+  color: var(--lamp-ink);
+}
+
+.wrap {
+  width: 100%;
+  max-width: var(--wrap);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.skip {
+  position: absolute;
+  left: 16px;
+  top: -64px;
+  z-index: 100;
+  padding: 8px 16px;
+  background: var(--text);
+  color: var(--bg);
+  border-radius: 8px;
+}
+.skip:focus {
+  top: 16px;
+}
+
+.mono {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.section {
+  padding: clamp(64px, 9vw, 112px) 0;
+}
+.section + .section {
+  border-top: 1px solid var(--line);
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.section-head h2 {
+  font-size: clamp(28px, 3.4vw, 36px);
+  letter-spacing: -0.01em;
+}
+.section-head a {
+  white-space: nowrap;
+  color: var(--text-2);
+  text-decoration: none;
+  font-size: 15px;
+}
+.section-head a:hover {
+  color: var(--text);
+}
+
+.lede {
+  color: var(--text-2);
+  font-size: clamp(17px, 1.6vw, 19px);
+  line-height: 1.55;
+  max-width: 36rem;
+  text-wrap: pretty;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font: 500 15px/1 var(--font);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 150ms var(--ease),
+    border-color 150ms var(--ease),
+    color 150ms var(--ease),
+    transform 120ms var(--ease);
+}
+.btn:active {
+  transform: scale(0.98);
+}
+.btn svg {
+  width: 18px;
+  height: 18px;
+}
+.btn-primary {
+  background: var(--lamp);
+  color: var(--lamp-ink);
+}
+.btn-primary:hover {
+  background: #f6b955;
+}
+.btn-quiet {
+  background: var(--raised);
+  border-color: var(--line);
+  color: var(--text);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+.btn-quiet:hover {
+  background: #222734;
+  border-color: var(--line-strong);
+}
+.btn-small {
+  height: 36px;
+  padding: 0 14px;
+  font-size: 14px;
+  border-radius: 8px;
+}
+
+/* The shift clock: when the conversation was recorded. The show's one signature. */
+.shift {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--lamp);
+  white-space: nowrap;
+}
+.shift svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Form fields */
+.field {
+  display: grid;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  background: var(--deep);
+  color: var(--text);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  font: 400 16px/1.4 var(--font);
+  transition: border-color 150ms var(--ease);
+}
+.field textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+.field input:hover,
+.field textarea:hover {
+  border-color: rgb(238 240 245 / 0.24);
+}
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--lamp);
+}
+
+.prose {
+  color: var(--text-2);
+  font-size: 17px;
+  line-height: 1.7;
+  max-width: 40rem;
+}
+.prose > * + * {
+  margin-top: 20px;
+}
+.prose h2 {
+  color: var(--text);
+  font-size: 22px;
+  margin-top: 40px;
+}
+.prose ul {
+  padding-left: 20px;
+}
+.prose li + li {
+  margin-top: 8px;
+}
+.prose blockquote {
+  margin: 32px 0;
+  padding: 0 0 0 20px;
+  border-left: 2px solid var(--lamp);
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1.5;
+}
+.prose blockquote p {
+  margin: 0;
+}
+.prose a {
+  color: var(--text);
+  text-decoration-color: var(--lamp);
+  text-underline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

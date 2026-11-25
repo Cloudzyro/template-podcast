@@ -1,0 +1,161 @@
+---
+import Base from "../layouts/Base.astro";
+import Form from "../components/Form.astro";
+import { show } from "../data/show";
+---
+
+<Base title="About the show" description={`Who makes ${show.name}, how it's recorded, and how to be a guest.`}>
+  <section class="wrap head">
+    <h1>A podcast recorded on the night shift</h1>
+    <div class="cols">
+      <p class="lede">{show.description}</p>
+      <div class="prose">
+        <p>
+          Every episode is recorded where the guest works, during their shift, with a small recorder and whatever
+          background noise the night brings: proofing cabinets, river radio, call bells, the hum of forty dryers. We
+          keep most of it in.
+        </p>
+        <p>
+          We don't interview experts on night work. We interview people doing it, and let them take as long as they
+          need.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="hosts" aria-labelledby="hosts-title">
+    <div class="wrap">
+      <h2 id="hosts-title" class="h2">Hosts</h2>
+      <ul class="hosts">
+        {
+          show.hosts.map((host) => (
+            <li>
+              <span class="monogram" aria-hidden="true">{host.initials}</span>
+              <h3>{host.name}</h3>
+              <p class="role">
+                {host.role}
+                <span class="mono">{host.shift}</span>
+              </p>
+              <p class="bio">{host.bio}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="guest" aria-labelledby="guest-title">
+    <div class="wrap guest">
+      <div>
+        <h2 id="guest-title" class="h2">{show.guest.title}</h2>
+        <p class="lede">{show.guest.text}</p>
+        <div class="sponsor">
+          <h3>{show.sponsors.title}</h3>
+          <p>
+            {show.sponsors.text}{" "}
+            <a href={`mailto:${show.sponsorEmail}`}>{show.sponsorEmail}</a>
+          </p>
+        </div>
+      </div>
+      <div class="form-card">
+        <Form kind="guest" email={show.guestEmail} subject={`Guest idea for ${show.name}`} button="Send" />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .head {
+    padding-top: clamp(48px, 7vw, 96px);
+    padding-bottom: clamp(56px, 7vw, 96px);
+  }
+  h1 {
+    font-size: clamp(40px, 5.6vw, 68px);
+    letter-spacing: -0.03em;
+    line-height: 1.02;
+    max-width: 16ch;
+    margin-bottom: 40px;
+  }
+  .cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(32px, 6vw, 80px);
+  }
+  .h2 {
+    font-size: clamp(28px, 3.4vw, 36px);
+    letter-spacing: -0.01em;
+    margin-bottom: 32px;
+  }
+  .hosts {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(32px, 5vw, 64px);
+  }
+  .monogram {
+    display: grid;
+    place-items: center;
+    width: 96px;
+    height: 96px;
+    margin-bottom: 24px;
+    border-radius: 16px;
+    background: var(--raised);
+    border: 1px solid var(--line);
+    font: 500 26px/1 var(--mono);
+    color: var(--text-2);
+  }
+  h3 {
+    font-size: 24px;
+  }
+  .role {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    align-items: center;
+    color: var(--muted);
+    margin: 8px 0 16px;
+    font-size: 15px;
+  }
+  .bio {
+    color: var(--text-2);
+    max-width: 34rem;
+  }
+  .guest {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: clamp(32px, 6vw, 80px);
+  }
+  .sponsor {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .sponsor h3 {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+  .sponsor p {
+    color: var(--text-2);
+  }
+  .sponsor a {
+    color: var(--text);
+    text-decoration-color: var(--lamp);
+    text-underline-offset: 3px;
+  }
+  .form-card {
+    padding: 24px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    align-self: start;
+  }
+  @media (max-width: 860px) {
+    .cols,
+    .hosts,
+    .guest {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

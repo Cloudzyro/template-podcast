@@ -1,0 +1,151 @@
+---
+// Posts to PUBLIC_FORM_ENDPOINT (Formspree, Basin, a Supabase function or similar).
+// With no endpoint set, sending opens the visitor's email app instead.
+interface Props {
+  kind: "newsletter" | "guest";
+  email: string;
+  subject: string;
+  button: string;
+}
+const { kind, email, subject, button } = Astro.props;
+const endpoint = import.meta.env.PUBLIC_FORM_ENDPOINT ?? "";
+---
+
+<form
+  class={`form form-${kind}`}
+  method="post"
+  action={endpoint || `mailto:${email}`}
+  data-endpoint={endpoint}
+  data-email={email}
+  data-subject={subject}
+  data-kind={kind}
+>
+  <input type="hidden" name="_subject" value={subject} />
+  <input type="hidden" name="form" value={kind} />
+  {
+    kind === "newsletter" ? (
+      <div class="inline">
+        <label class="field">
+          <span>Email address</span>
+          <input name="email" type="email" autocomplete="email" required />
+        </label>
+        <button class="btn btn-primary" type="submit">{button}</button>
+      </div>
+    ) : (
+      <>
+        <div class="row">
+          <label class="field">
+            <span>Your name</span>
+            <input name="name" autocomplete="name" required />
+          </label>
+          <label class="field">
+            <span>Email</span>
+            <input name="email" type="email" autocomplete="email" required />
+          </label>
+        </div>
+        <div class="row">
+          <label class="field">
+            <span>What you do</span>
+            <input name="work" placeholder="Night baker, tow truck driver" required />
+          </label>
+          <label class="field">
+            <span>Your usual hours</span>
+            <input name="hours" placeholder="23:00 to 07:00" />
+          </label>
+        </div>
+        <label class="field">
+          <span>Tell us about a night at work</span>
+          <textarea name="message" rows="5" required />
+        </label>
+        <div>
+          <button class="btn btn-primary" type="submit">{button}</button>
+        </div>
+      </>
+    )
+  }
+  {
+    !endpoint && (
+      <p class="note">
+        This form isn't connected yet, so sending opens your email app. You can also write to{" "}
+        <a href={`mailto:${email}?subject=${encodeURIComponent(subject)}`}>{email}</a>
+      </p>
+    )
+  }
+  <p class="status" role="status" aria-live="polite"></p>
+</form>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>("form.form").forEach((form) => {
+    const status = form.querySelector<HTMLElement>(".status")!;
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const { endpoint, email, subject, kind } = form.dataset;
+      const data = new FormData(form);
+
+      if (!endpoint) {
+        const lines = [...data.entries()]
+          .filter(([key]) => !key.startsWith("_") && key !== "form")
+          .map(([key, value]) => `${key}: ${value}`);
+        window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject ?? "")}&body=${encodeURIComponent(lines.join("\n"))}`;
+        status.textContent = "Your email app should open with this filled in.";
+        return;
+      }
+
+      const button = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
+      button.disabled = true;
+      status.textContent = "Sending";
+      try {
+        const res = await fetch(endpoint, { method: "POST", body: data, headers: { Accept: "application/json" } });
+        if (!res.ok) throw new Error(String(res.status));
+        form.reset();
+        status.textContent =
+          kind === "newsletter"
+            ? "You're on the list. The next night log arrives Thursday morning."
+            : "Thank you. We read every one and reply within a week.";
+      } catch {
+        status.replaceChildren("That didn't send. Please write to ");
+        status.append(Object.assign(document.createElement("a"), { href: `mailto:${email}`, textContent: email }));
+      } finally {
+        button.disabled = false;
+      }
+    });
+  });
+</script>
+
+<style>
+  .form {
+    display: grid;
+    gap: 16px;
+  }
+  .inline {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+  }
+  .inline .field {
+    flex: 1;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .note,
+  .status {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .status:empty {
+    display: none;
+  }
+  .note a,
+  .status :global(a) {
+    color: var(--text-2);
+  }
+  @media (max-width: 520px) {
+    .inline {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>

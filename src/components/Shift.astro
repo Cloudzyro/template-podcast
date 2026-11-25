@@ -1,0 +1,13 @@
+---
+import Icon from "./Icon.astro";
+interface Props {
+  time: string;
+  long?: boolean;
+}
+const { time, long } = Astro.props;
+---
+
+<span class="shift" title={`Recorded at ${time}`}>
+  <Icon name="clock" />
+  {long ? `Recorded at ${time}` : time}
+</span>

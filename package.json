@@ -1,0 +1,25 @@
+{
+  "name": "template-podcast",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A podcast website template with an episode player, show notes pages, hosts, subscribe links, an RSS feed and a newsletter form, built with Astro.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "sample-audio": "node scripts/make-sample-audio.mjs"
+  },
+  "dependencies": {
+    "@astrojs/rss": "4.0.19",
+    "@astrojs/sitemap": "3.7.4",
+    "@fontsource-variable/red-hat-mono": "5.3.0",
+    "@fontsource-variable/schibsted-grotesk": "5.3.0",
+    "astro": "7.4.10"
+  },
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "packageManager": "pnpm@12.10.1"
+}
